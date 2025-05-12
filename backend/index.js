@@ -30,21 +30,24 @@ app.post("/api/tasks", (req, res) => {
         return res.status(400).json({error: "Missing task title"})
     }
     const task = {
-        id: nextID(),
+        id: nextID(tasks),
         title: req.body.title,
         description: req.body.description,
-        completed: req.body.completed,
-        createdAt: req.body.createdAt
+        completed: false,
+        createdAt: new Date()
     }
     tasks = tasks.concat(task);
-    res.sendStatus(200);
+    res.json(tasks);
 })
 
 app.put("/api/tasks/:id", (req, res) => {
     const taskID = req.params.id;
-    if (tasks.indexOf(taskID) === -1) {
+    const taskExists = tasks.some(task => task.id === taskID);
+    
+    if (!taskExists) {
         return res.status(404).json({error: "Required task doesn't exist"})
     }
+
     const updatedTask = {
         id: req.params.id,
         title: req.body.title,
@@ -52,15 +55,19 @@ app.put("/api/tasks/:id", (req, res) => {
         completed: req.body.completed,
         createdAt: req.body.createdAt
     }
+
     tasks = tasks.map(task => (task.id === taskID) ? updatedTask : task);
     res.sendStatus(200);
 })
 
 app.delete("/api/tasks/:id", (req, res) => {
     const taskID = req.params.id;
-    if (tasks.indexOf(taskID) === -1) {
+    const taskExists = tasks.some(task => task.id === taskID);
+    
+    if (!taskExists) {
         return res.status(404).json({error: "Required task doesn't exist"})
     }
+
     tasks = tasks.filter(task => task.id !== taskID);
     res.sendStatus(200);
 })

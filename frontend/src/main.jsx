@@ -6,14 +6,15 @@ import {
   Routes,
   Route,
   Link,
-  useParams
+  useParams,
+  useNavigate
 } from 'react-router-dom'
 
 
 const TaskItem = ({task}) => {
 
   return (
-    <li>{task.title}</li>
+    <li>{task.title} - {task.description}</li>
   )
 } 
 
@@ -26,14 +27,32 @@ const TaskList = ({tasks}) => {
   )  
 } 
 
-const TaskForm = () => {
+const TaskForm = ({setter}) => {
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
 
+  const navigate = useNavigate();
+
   const addTask = e => {
     e.preventDefault();
-
+    const newTask = {
+      title: title,
+      description: desc
+    }
+    fetch("http://localhost:3000/api/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newTask)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Added new task");
+      setter(data);
+      navigate("/tasks");
+    })
   }
 
   const handleTitleChange = e => {
@@ -78,7 +97,7 @@ function App() {
       </div>
       <Routes>
         <Route path="/tasks" element={<TaskList tasks={tasks}/>}/>
-        <Route path="/tasks/new" element={<TaskForm/>}/>
+        <Route path="/tasks/new" element={<TaskForm setter={setTasks}/>}/>
       </Routes>
     </>
   )
